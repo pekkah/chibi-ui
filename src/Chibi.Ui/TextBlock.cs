@@ -11,7 +11,7 @@ public class TextBlock : ContentControl<string>
     public TextBlock()
     {
         FontProperty = Property(nameof(Font), Font12X20);
-        ColorProperty = Property(nameof(Color), Color.White);
+        ColorProperty = Property(nameof(Color), Color.Black);
         ContentPresenter = new TextPresenter
         {
             ParentElement = this,
