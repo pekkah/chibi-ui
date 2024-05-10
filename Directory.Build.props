@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project>
+	<PropertyGroup>
+		<Copyright>Pekka Heikura</Copyright>
+		<PackageProjectUrl>https://github.com/pekkah/chibi-ui</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/pekkah/chibi-ui</RepositoryUrl>
+		<Description></Description>
+		<PackageTags></PackageTags>
+		<Authors>Pekka Heikura</Authors>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AssemblyName Condition="'$(AssemblyName)' == ''">Chibi.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace Condition="'$(RootNamespace)' == ''">Chibi.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	</PropertyGroup>
+</Project>
