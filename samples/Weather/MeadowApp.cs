@@ -4,10 +4,10 @@ using Meadow.Hardware;
 using System.Threading.Tasks;
 using Chibi.Ui.Views;
 using Chibi.Weather.Shared;
-using Chibi.Weather.Shared.Views;
 using Meadow.Foundation.Sensors.Hid;
 using System.Threading;
 using Chibi.Ui.Weather;
+using Chibi.Ui.Weather.Shared;
 using Chibi.Ui.Weather.Shared.Views;
 
 namespace Weather

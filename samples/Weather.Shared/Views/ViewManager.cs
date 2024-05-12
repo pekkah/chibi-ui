@@ -1,9 +1,9 @@
-﻿using Chibi.Ui;
-using Chibi.Ui.Views;
+﻿using Chibi.Ui.Views;
+using Chibi.Weather.Shared.Views;
 using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
 
-namespace Chibi.Weather.Shared.Views;
+namespace Chibi.Ui.Weather.Shared.Views;
 
 public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps) : ViewManagerBase<WeatherViewBase>(graphicsDevice, maxFps)
 {

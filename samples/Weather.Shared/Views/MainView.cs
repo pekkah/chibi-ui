@@ -1,4 +1,9 @@
-﻿using Chibi.Ui.Views;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Chibi.Ui.DataBinding;
+using Chibi.Ui.Views;
 using Chibi.Weather.Shared.Views;
 using Meadow;
 using Meadow.Foundation.Graphics;
@@ -9,6 +14,7 @@ public class MainView : WeatherViewBase
 {
     public MainView(IRenderingDetails details)
     {
+        Hours = new ReactiveProperty<ObservableCollection<UiElement>>("Hours", []);
         Root = new DockPanel
         {
             LastChildFill = true,
@@ -46,11 +52,35 @@ public class MainView : WeatherViewBase
                             Font = new Font6x8()
                         }
                     ]
+                },
+                new UniformGrid
+                {
+                    Columns = 3,
+                    ChildrenProperty =
+                    {
+                        Hours
+                    }
                 }
             ]
         };
     }
 
+    public ReactiveProperty<ObservableCollection<UiElement>> Hours { get; }
+
+    public override void Load()
+    {
+        var hours = new ObservableCollection<UiElement>();
+        foreach (var hour in Enumerable.Range(DateTime.Now.Hour, 6))
+        {
+            hours.Add(new HeaderContentControl
+            {
+                Header = $"{hour}:00",
+                Value = "20°C"
+            });
+        }
+
+        Hours.Value = new ObservableCollection<UiElement>(hours);
+    }
 
     public override void OnLeft()
     {

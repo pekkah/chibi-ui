@@ -11,18 +11,17 @@ public class HeaderContentControl : UserControl
         HeaderProperty = Property(nameof(Header), "");
         ValueProperty = Property(nameof(Value), "");
         OrientationProperty = Property(nameof(Orientation), Orientation.Vertical);
-        HeaderFontColorProperty = Property(nameof(HeaderFontColor), new Color(244,113,181));
-        ValueFontColorProperty = Property(nameof(ValueFontColor), new Color(208, 201, 203));
+        HeaderFontColorProperty = Property(nameof(HeaderFontColor), Color.Black);
+        ValueFontColorProperty = Property(nameof(ValueFontColor), Color.Gray);
         SpacingProperty = Property(nameof(Spacing), 5);
 
-        Padding = new Thickness(5);
-        Margin = new Thickness(3);
-        Height = 35;
+        Padding = new Thickness(2);
+        Margin = new Thickness(2);
         Background = new RectangleBrush()
         {
             Color = new Color(30, 41, 59),
-            Filled = true,
-            CornerRadius = 10,
+            Filled = false,
+            CornerRadius = 3,
         };
 
         Content = new StackPanel

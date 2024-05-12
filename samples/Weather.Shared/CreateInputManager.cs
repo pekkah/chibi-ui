@@ -1,7 +1,7 @@
-﻿using Chibi.Ui;
-using Chibi.Weather.Shared.Views;
+﻿using Chibi.Ui.Weather.Shared.Views;
+using Chibi.Weather.Shared;
 
-namespace Chibi.Weather.Shared;
+namespace Chibi.Ui.Weather.Shared;
 
 public static partial class W
 {
