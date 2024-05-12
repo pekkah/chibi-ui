@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <Project>
-	<PropertyGroup>
-		<Copyright>Pekka Heikura</Copyright>
-		<PackageProjectUrl>https://github.com/pekkah/savustin</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/pekkah/savustin</RepositoryUrl>
-		<Description></Description>
-		<PackageTags></PackageTags>
-		<Authors>Pekka Heikura</Authors>
-		<LangVersion>12.0</LangVersion>
-	</PropertyGroup>
-	<PropertyGroup>
-		<AssemblyName Condition="'$(AssemblyName)' == ''">Chibi.Ui.$(MSBuildProjectName)</AssemblyName>
-		<RootNamespace Condition="'$(RootNamespace)' == ''">Chibi.Ui.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-	</PropertyGroup>
+  <PropertyGroup>
+    <Copyright>Pekka Heikura</Copyright>
+    <PackageProjectUrl>https://github.com/pekkah/savustin</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pekkah/savustin</RepositoryUrl>
+    <Description>
+    </Description>
+    <PackageTags>
+    </PackageTags>
+    <Authors>Pekka Heikura</Authors>
+    <LangVersion>12.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName Condition="'$(AssemblyName)' == ''">Chibi.Ui.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace Condition="'$(RootNamespace)' == ''">Chibi.Ui.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Condition="!Exists('packages.config')">
+      <PrivateAssets>all</PrivateAssets>
+      <Version>3.6.133</Version>
+    </PackageReference>
+  </ItemGroup>
 </Project>
