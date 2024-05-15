@@ -10,8 +10,11 @@ namespace Chibi.Ui.Views;
 
 public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigationController, IRenderingDetails where TViewBase: IViewController
 {
-    protected ViewManagerBase(IGraphicsDevice graphicsDevice, int maxFps)
+    private readonly Color _clearColor;
+
+    protected ViewManagerBase(IGraphicsDevice graphicsDevice, int maxFps, Color clearColor)
     {
+        _clearColor = clearColor;
         Fps = Property(nameof(Fps), 0);
         MaxFps = maxFps;
         Renderer = new Renderer(graphicsDevice);
@@ -43,7 +46,7 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigation
 
     public void Draw()
     {
-        Renderer.Clear();
+        Renderer.Clear(_clearColor);
         CurrentView.Render(Renderer);
         Renderer.Show();
     }

@@ -1,11 +1,11 @@
 ﻿using Chibi.Ui.Views;
-using Chibi.Weather.Shared.Views;
 using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
 
 namespace Chibi.Ui.Weather.Shared.Views;
 
-public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps) : ViewManagerBase<WeatherViewBase>(graphicsDevice, maxFps)
+public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps) 
+    : ViewManagerBase<WeatherViewBase>(graphicsDevice, maxFps, Theme.ScreenBackground)
 {
     public void HandleTouch(TouchPoint point)
     {

@@ -1,6 +1,6 @@
 ﻿using Chibi.Ui.Views;
 
-namespace Chibi.Weather.Shared.Views;
+namespace Chibi.Ui.Weather.Shared.Views;
 
 public abstract class WeatherViewBase : ViewBase
 {

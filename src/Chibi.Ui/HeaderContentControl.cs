@@ -12,17 +12,13 @@ public class HeaderContentControl : UserControl
         ValueProperty = Property(nameof(Value), "");
         OrientationProperty = Property(nameof(Orientation), Orientation.Vertical);
         HeaderFontColorProperty = Property(nameof(HeaderFontColor), Color.Black);
-        ValueFontColorProperty = Property(nameof(ValueFontColor), Color.Gray);
+        ValueFontColorProperty = Property(nameof(ValueFontColor), Color.Black);
         SpacingProperty = Property(nameof(Spacing), 5);
+        HeaderFontProperty = Property(nameof(HeaderFont), (IFont)new Font12x16());
+        ValueFontProperty = Property(nameof(ValueFont), (IFont)new Font12x16());
 
         Padding = new Thickness(2);
         Margin = new Thickness(2);
-        Background = new RectangleBrush()
-        {
-            Color = new Color(30, 41, 59),
-            Filled = false,
-            CornerRadius = 3,
-        };
 
         Content = new StackPanel
         {
@@ -38,12 +34,14 @@ public class HeaderContentControl : UserControl
             [
                 new TextBlock
                 {
-                    Padding = new Thickness(5),
                     ContentProperty =
                     {
                         HeaderProperty
                     },
-                    Font = new Font12x16(),
+                    FontProperty =
+                    {
+                        HeaderFontProperty
+                    },
                     ColorProperty =
                     {
                         HeaderFontColorProperty
@@ -51,12 +49,14 @@ public class HeaderContentControl : UserControl
                 },
                 new TextBlock
                 {
-                    Padding = new Thickness(5),
                     ContentProperty =
                     {
                         ValueProperty
                     },
-                    Font = new Font12x16(),
+                    FontProperty =
+                    {
+                        ValueFontProperty
+                    },
                     ColorProperty =
                     {
                         ValueFontColorProperty
@@ -64,6 +64,22 @@ public class HeaderContentControl : UserControl
                 }
             ]
         };
+    }
+
+    public ReactiveProperty<IFont> ValueFontProperty { get; }
+
+    public IFont ValueFont
+    {
+        get => ValueFontProperty.Value;
+        set => ValueFontProperty.Value = value;
+    }
+
+    public ReactiveProperty<IFont> HeaderFontProperty { get; }
+
+    public IFont HeaderFont
+    {
+        get => HeaderFontProperty.Value;
+        set => HeaderFontProperty.Value = value;
     }
 
     public ReactiveProperty<int> SpacingProperty { get; }
@@ -109,8 +125,8 @@ public class HeaderContentControl : UserControl
 
     public Color ValueFontColor
     {
-        get => HeaderFontColorProperty.Value;
-        set => HeaderFontColorProperty.Value = value;
+        get => ValueFontColorProperty.Value;
+        set => ValueFontColorProperty.Value = value;
     }
 
     public ReactiveProperty<Color> ValueFontColorProperty { get; }

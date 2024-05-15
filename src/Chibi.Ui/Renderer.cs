@@ -7,9 +7,6 @@ namespace Chibi.Ui;
 
 public class Renderer(IGraphicsDevice graphicsDevice)
 {
-    public static Color ClearColorDark = new Color(15, 23, 42);
-    public static Color ClearColorLight = new Color(255, 255, 255);
-
     public Rect DeviceBounds => new Rect(0, 0, graphicsDevice.Width, graphicsDevice.Height);
 
     public IGraphicsDevice GraphicsDevice => graphicsDevice;
@@ -74,8 +71,8 @@ public class Renderer(IGraphicsDevice graphicsDevice)
         graphicsDevice.Show();
     }
 
-    public virtual void Clear()
+    public virtual void Clear(Color clearColor)
     {
-        graphicsDevice.Clear(ClearColorLight);
+        graphicsDevice.Clear(clearColor);
     }
 }
