@@ -3,6 +3,7 @@ using Meadow.Devices;
 using Meadow.Foundation.Leds;
 using Meadow.Peripherals.Leds;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Chibi.Ui;
 using Chibi.Ui.Views;
@@ -24,15 +25,18 @@ namespace Weather.F7
 
         public override async Task Initialize()
         {
+            Resolver.Log.Info("Checking connection...");
             var networkConnected = new TaskCompletionSource<object>();
             Device.NetworkConnected += (s, e) =>
             {
-                Resolver.Log.Info("Network connected");
                 networkConnected.SetResult(null);
             };
 
-            await networkConnected.Task;
+            if (Device.NetworkAdapters.Any(n => n.IsConnected))
+                networkConnected.SetResult(null);
 
+            await networkConnected.Task;
+            Resolver.Log.Info("Network connected");
 
             Resolver.Log.Info("Initialize...");
 
