@@ -15,10 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Weather.Shared", "samples\W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DB3242E0-EA67-4AD6-8FF4-023B70DDB615}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chibi.Ui.Tests", "tests\Chibi.Ui.Tests\Chibi.Ui.Tests.csproj", "{238BB094-E33F-450A-AF2F-0DE41184D271}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chibi.Ui.Tests", "tests\Chibi.Ui.Tests\Chibi.Ui.Tests.csproj", "{238BB094-E33F-450A-AF2F-0DE41184D271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
