@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Threading;
 using Chibi.Ui.DataBinding;
 using Chibi.Ui.Views;
 using Meadow;
