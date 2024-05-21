@@ -3,6 +3,8 @@
 Small WPF/Avalonia style UI framework targeting Meadow platform. Tested to work on Desktop and F7v2. 
 Quite a lot of "code" was borrowed from Avalonia and stripped of anything extra.
 
+[NuGet](https://www.nuget.org/packages/Chibi.Ui)
+
 
 ## Weather sample application
 
