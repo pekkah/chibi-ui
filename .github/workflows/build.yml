@@ -43,7 +43,7 @@ jobs:
           dotnet pack -c Release -o ./artifacts -p:PackageVersion=${{ steps.nbgv.outputs.NuGetPackageVersion }}
         
       - name: Publish build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Packages
           path: |
