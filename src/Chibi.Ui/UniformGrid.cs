@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
 using Chibi.Ui.DataBinding;
 
 namespace Chibi.Ui;
@@ -11,15 +8,14 @@ namespace Chibi.Ui;
 /// </summary>
 public class UniformGrid : Panel
 {
-    private int _columns;
-
-    private int _rows;
-
     public UniformGrid()
     {
         RowsProperty = Property(nameof(Rows), 0);
         ColumnsProperty = Property(nameof(Columns), 0);
         FirstColumnProperty = Property(nameof(FirstColumn), 0);
+        ChildrenProperty.Subscribe(_ => InvalidateMeasure());
+        RowsProperty.Subscribe(_ => InvalidateMeasure());
+        ColumnsProperty.Subscribe(_ => InvalidateMeasure());
     }
 
     /// <summary>
@@ -64,14 +60,19 @@ public class UniformGrid : Panel
         set => FirstColumnProperty.Value = value;
     }
 
+    public int ActualRows { get; private set; }
+
+    public int ActualColumns { get; private set; }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         UpdateRowsAndColumns();
 
         var maxWidth = 0;
         var maxHeight = 0;
-
-        var childAvailableSize = new Size(availableSize.Width / _columns, availableSize.Height / _rows);
+        var rows = ActualRows == 0 ? 1 : ActualRows;
+        var columns = ActualColumns == 0 ? 1 : ActualColumns;
+        var childAvailableSize = new Size(availableSize.Width / columns, availableSize.Height / rows);
 
         foreach (var child in Children)
         {
@@ -82,7 +83,7 @@ public class UniformGrid : Panel
             if (child.DesiredSize.Height > maxHeight) maxHeight = child.DesiredSize.Height;
         }
 
-        return new Size(maxWidth * _columns, maxHeight * _rows);
+        return new Size(maxWidth * columns, maxHeight * rows);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
@@ -90,8 +91,10 @@ public class UniformGrid : Panel
         var x = FirstColumn;
         var y = 0;
 
-        var width = finalSize.Width / _columns;
-        var height = finalSize.Height / _rows;
+        var rows = ActualRows == 0 ? 1 : ActualRows;
+        var columns = ActualColumns == 0 ? 1 : ActualColumns;
+        var width = finalSize.Width / columns;
+        var height = finalSize.Height / rows;
 
         foreach (var child in Children)
         {
@@ -101,7 +104,7 @@ public class UniformGrid : Panel
 
             x++;
 
-            if (x >= _columns)
+            if (x >= Columns)
             {
                 x = 0;
                 y++;
@@ -113,8 +116,8 @@ public class UniformGrid : Panel
 
     private void UpdateRowsAndColumns()
     {
-        _rows = Rows;
-        _columns = Columns;
+        var _rows = Rows;
+        var _columns = Columns;
 
         if (FirstColumn >= Columns) FirstColumn = 0;
 
@@ -143,5 +146,8 @@ public class UniformGrid : Panel
 
             if (rem != 0) _columns++;
         }
+
+        ActualRows = _rows;
+        ActualColumns = _columns;
     }
 }

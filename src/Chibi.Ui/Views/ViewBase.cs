@@ -1,38 +1,64 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Chibi.Ui.DataBinding;
 
 namespace Chibi.Ui.Views;
 
-public abstract class ViewBase : IViewController
+public abstract class ViewBase : UiElement, IViewController, ILayoutRoot, IEmbeddedLayoutRoot
 {
     protected ViewBase()
     {
-        Root = new TextBlock()
+        LayoutManager = new LayoutManager(this);
+        ContentProperty = Property(nameof(Content), (UiElement)new TextBlock()
         {
             Text = GetType().Name,
-        };
+        });
+
+        ContentProperty.Subscribe(OnContentChanged);
     }
 
-    private UiElement _root;
+    private IDisposable? _contentChanged;
 
-    public UiElement Root
+    [MemberNotNull("FocusManager")]
+    private void OnContentChanged(PropertyChangedEvent<UiElement> obj)
     {
-        get => _root ?? throw new InvalidOperationException("Root not set");
-
-        [MemberNotNull("FocusManager")]
-        [MemberNotNull(nameof(_root))]
-        set
+        if (obj.OldValue is not null)
         {
-            _root = value;
-            FocusManager = new FocusManager(_root);
+            obj.OldValue.ParentElement = null;
+            obj.OldValue.RootElement = null;
+            _contentChanged?.Dispose();
         }
+
+        if (obj.Value is not null)
+        {
+            obj.Value.ParentElement = this;
+            obj.Value.RootElement = this;
+            _contentChanged = obj.Value.DesiredSizeProperty.Subscribe(_ =>
+            {
+                InvalidateLayout();
+            });
+            FocusManager = new FocusManager(obj.Value);
+        }
+
+        InvalidateLayout();
+    }
+
+    public ReactiveProperty<UiElement> ContentProperty { get;  }
+
+    public UiElement Content
+    {
+        get => ContentProperty.Value;
+        set => ContentProperty.Value = value;
     }
 
     public FocusManager FocusManager { get; private set; }
 
+    public LayoutManager LayoutManager { get; private set; }
+
     public virtual void Render(Renderer renderer)
     {
-        renderer.Render(Root, renderer.DeviceBounds);
+        LayoutManager.ExecuteQueuedLayoutPass();
+        renderer.Render(this);
     }
 
 
@@ -41,13 +67,43 @@ public abstract class ViewBase : IViewController
         FocusManager.TrySetFocus(focusable);
     }
 
-    public virtual void Unload()
+    public override void Unload()
     {
-        Root.Unload();
+        Content.Unload();
+        TreeHelper.Visit(this, (parent, child) => child.ParentElement = parent);
     }
 
-    public virtual void Load()
+    public override void Load()
     {
-        Root.Load();
+        TreeHelper.Visit(this, (parent, child) =>
+        {
+            child.ParentElement = parent;
+            child.RootElement = this;
+        });
+        Content.Load();
+        LayoutManager.InvalidateMeasure(this);
+        LayoutManager.ExecuteInitialLayoutPass();
     }
+
+    public virtual void Loaded()
+    {
+    }
+
+    public void InvalidateLayout()
+    {
+        InvalidateMeasure();
+        InvalidateArrange();
+    }
+
+    public override int GetChildCount()
+    {
+        return 1;
+    }
+
+    public override UiElement GetChild(int index)
+    {
+        return Content ?? throw new InvalidOperationException();
+    }
+
+    public Size AllocatedSize { get; set; }
 }

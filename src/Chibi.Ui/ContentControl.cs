@@ -1,6 +1,5 @@
 ﻿using System;
 using Chibi.Ui.DataBinding;
-using Chibi.Ui.Helpers;
 
 namespace Chibi.Ui;
 
@@ -16,20 +15,26 @@ public class ContentControl<TContent>: UiElement
         ContentProperty.Subscribe(OnContentChanged);
     }
 
+    private IDisposable? _contentDesiredSizeChanged;
     private void OnContentChanged(PropertyChangedEvent<TContent?> ev)
     {
-        InvalidateMeasure();
-
         if (ev.OldValue is UiElement oldElement)
         {
-            oldElement.DetachParent();
+            oldElement.ParentElement = null;
+            oldElement.RootElement = null;
+            _contentDesiredSizeChanged?.Dispose();
         }
 
         if (ev.Value is UiElement element)
         {
-            AttachChild(element);
+            element.ParentElement = this;
+            element.RootElement = RootElement;
             ContentPresenter = element;
+            _contentDesiredSizeChanged = element.DesiredSizeProperty.Subscribe(_ => InvalidateMeasure());
         }
+
+
+        InvalidateMeasure();
     }
 
     public ReactiveProperty<Thickness> PaddingProperty { get; }
@@ -71,7 +76,9 @@ public class ContentControl<TContent>: UiElement
         get => ContentPresenterProperty.Value;
         set
         {
-            ContentPresenter?.DetachParent();
+            if (ContentPresenter != null)
+                ContentPresenter.ParentElement = null;
+            
             ContentPresenterProperty.Value = value;
         }
     }

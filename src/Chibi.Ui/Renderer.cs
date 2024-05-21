@@ -11,16 +11,11 @@ public class Renderer(IGraphicsDevice graphicsDevice)
 
     public IGraphicsDevice GraphicsDevice => graphicsDevice;
 
-    public void Render(UiElement element, Rect finalRect)
+    public void Render(UiElement element)
     {
         var context = graphicsDevice.CreateDrawingContext();
 
         //var stopwatch = Stopwatch.StartNew();
-        LayoutManager.Measure(element, finalRect.Size, true);
-        //Resolver.Log.Info($"Measure: {stopwatch.Elapsed.TotalMilliseconds}ms");
-
-        LayoutManager.Arrange(element, finalRect, true);
-        //Resolver.Log.Info($"Arrange: {stopwatch.Elapsed.TotalMilliseconds}ms");
 
         RenderElement(element, context, element.Bounds);
 

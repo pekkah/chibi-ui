@@ -22,8 +22,18 @@ namespace Weather.F7
     {
         private RgbPwmLed _onboardLed;
 
-        public override Task Initialize()
+        public override async Task Initialize()
         {
+            var networkConnected = new TaskCompletionSource<object>();
+            Device.NetworkConnected += (s, e) =>
+            {
+                Resolver.Log.Info("Network connected");
+                networkConnected.SetResult(null);
+            };
+
+            await networkConnected.Task;
+
+
             Resolver.Log.Info("Initialize...");
 
             _onboardLed = new RgbPwmLed(
@@ -43,11 +53,11 @@ namespace Weather.F7
                 height: 320
             );
             Display.SetRotation(RotationType._180Degrees);
-            Display.SpiBusSpeed = new Frequency(25, Frequency.UnitType.Megahertz);
+            Display.SpiBusSpeed = new Frequency(20, Frequency.UnitType.Megahertz);
 
             TouchScreen = new Xpt2046(
                 Device.CreateSpiBus(),
-                Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeFalling, ResistorMode.InternalPullUp),
+                Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeBoth, ResistorMode.InternalPullUp),
                 Device.Pins.D11.CreateDigitalOutputPort(true));
 
 
@@ -75,7 +85,7 @@ namespace Weather.F7
             inputManager.MapAction(keyboard.Pins.Enter.CreateDigitalInterruptPort(InterruptMode.EdgeRising), Actions.Enter);
             inputManager.MapAction(keyboard.Pins.Back.CreateDigitalInterruptPort(InterruptMode.EdgeRising), Actions.Back);
             */
-            return base.Initialize();
+            await base.Initialize();
         }
 
         public Xpt2046 TouchScreen { get; set; }
@@ -103,6 +113,7 @@ namespace Weather.F7
 
             TouchScreen.TouchUp += (s, e) =>
             {
+                Resolver.Log.Info($"Touch Up: {e.ScreenX}, {e.ScreenY}");
                 ViewManager.HandleTouch(e);
             };
 

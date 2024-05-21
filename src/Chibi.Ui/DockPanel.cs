@@ -4,6 +4,7 @@
 // Licensed to The Avalonia Project under MIT License, courtesy of The .NET Foundation.
 
 using System;
+using System.Linq;
 using Chibi.Ui.DataBinding;
 
 namespace Chibi.Ui;
@@ -24,6 +25,7 @@ public class DockPanel : Panel
     public DockPanel()
     {
         LastChildFillProperty = Property(nameof(LastChildFill), true);
+        AffectsMeasure<bool>(LastChildFillProperty);
     }
 
     /// <summary>
@@ -62,7 +64,7 @@ public class DockPanel : Panel
     /// <returns>The Panel's desired size.</returns>
     protected override Size MeasureOverride(Size constraint)
     {
-        var children = Children;
+        var children = Children.Where(c => c.IsVisible).ToList();
 
         int parentWidth = 0;   // Our current required width due to children thus far.
         int parentHeight = 0;   // Our current required height due to children thus far.
@@ -123,7 +125,7 @@ public class DockPanel : Panel
     /// <param name="arrangeSize">Size that DockPanel will assume to position children.</param>
     protected override Size ArrangeOverride(Size arrangeSize)
     {
-        var children = Children;
+        var children = Children.Where(c => c.IsVisible).ToList();
         int totalChildrenCount = children.Count;
         int nonFillChildrenCount = totalChildrenCount - (LastChildFill ? 1 : 0);
 

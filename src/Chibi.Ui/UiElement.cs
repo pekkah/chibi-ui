@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Chibi.Ui.DataBinding;
+using Chibi.Ui.Views;
 
 namespace Chibi.Ui;
 
@@ -19,6 +22,10 @@ public class UiElement : ObservableObject
         IsVisibleProperty = Property(nameof(IsVisible), true);
         WidthProperty = Property(nameof(Width), (int?)null);
         HeightProperty = Property(nameof(Height), (int?)null);
+        MinHeightProperty = Property(nameof(MinHeight), 0);
+        MaxHeightProperty = Property(nameof(MaxHeight), int.MaxValue);
+        MinWidthProperty = Property(nameof(MinWidth), 0);
+        MaxWidthProperty = Property(nameof(MaxWidth), int.MaxValue);
         MarginProperty = Property(nameof(Margin), new Thickness(0));
         VerticalAlignmentProperty = Property(nameof(VerticalAlignment), VerticalAlignment.Stretch);
         HorizontalAlignmentProperty = Property(nameof(HorizontalAlignment), HorizontalAlignment.Stretch);
@@ -27,10 +34,20 @@ public class UiElement : ObservableObject
         _isArrangeValidProperty = Property(nameof(IsArrangeValid), false);
         BackgroundProperty = Property(nameof(Background), default(IBrush));
 
-        IsArrangeValidProperty.Subscribe(isArrangeValid =>
-        {
-            if (!isArrangeValid) InvalidateRender();
-        });
+        AffectsMeasure<int?>(WidthProperty);
+        AffectsMeasure<int?>(HeightProperty);
+        AffectsMeasure<Thickness>(MarginProperty);
+        AffectsMeasure<HorizontalAlignment>(HorizontalAlignmentProperty);
+        AffectsMeasure<VerticalAlignment>(VerticalAlignmentProperty);
+        AffectsMeasure<int>(MinWidthProperty);
+        AffectsMeasure<int>(MaxWidthProperty);
+        AffectsMeasure<int>(MinHeightProperty);
+        AffectsMeasure<int>(MaxHeightProperty);
+
+        AffectsArrange<Size>(DesiredSizeProperty);
+
+
+        AffectsRender(IsArrangeValidProperty);
     }
 
     public ReactiveProperty<bool> IsDirtyProperty { get; }
@@ -81,25 +98,40 @@ public class UiElement : ObservableObject
 
     public ReactiveProperty<int?> HeightProperty { get; }
 
-    /// <summary>
-    ///     Gets or sets the minimum width of the element.
-    /// </summary>
-    public int MinWidth { get; set; }
+    public int MinWidth
+    {
+        get => MinWidthProperty.Value; 
+        set => MinWidthProperty.Value = value;
+    }
+
+    public ReactiveProperty<int> MinWidthProperty { get; }
 
     /// <summary>
     ///     Gets or sets the maximum width of the element.
     /// </summary>
-    public int MaxWidth { get; set; } = int.MaxValue;
+    public int MaxWidth
+    {
+        get => MaxWidthProperty.Value;
+        set => MaxWidthProperty.Value = value;
+    }
 
-    /// <summary>
-    ///     Gets or sets the minimum height of the element.
-    /// </summary>
-    public int MinHeight { get; set; }
+    public ReactiveProperty<int> MaxWidthProperty { get; }
 
-    /// <summary>
-    ///     Gets or sets the maximum height of the element.
-    /// </summary>
-    public int MaxHeight { get; set; } = int.MaxValue;
+    public int MinHeight
+    {
+        get => MinHeightProperty.Value;
+        set => MinHeightProperty.Value = value;
+    }
+
+    public ReactiveProperty<int> MinHeightProperty { get; }
+
+    public int MaxHeight
+    {
+        get => MaxHeightProperty.Value;
+        set => MaxHeightProperty.Value = value;
+    }
+
+    public ReactiveProperty<int> MaxHeightProperty { get; }
 
     /// <summary>
     ///     Gets or sets the margin around the element.
@@ -187,9 +219,21 @@ public class UiElement : ObservableObject
 
     public string? Name { get; set; }
 
+    public ILayoutRoot? RootElement { get; set; }
+
     public void AffectsRender<T>(IObservable<T> property)
     {
         property.Subscribe(_ => InvalidateRender());
+    }
+
+    public void AffectsMeasure<T>(IObservable<T> property)
+    {
+        property.Subscribe(_ => InvalidateMeasure());
+    }
+
+    public void AffectsArrange<T>(IObservable<T> property)
+    {
+        property.Subscribe(_ => InvalidateArrange());
     }
 
     protected void InvalidateRender()
@@ -204,6 +248,8 @@ public class UiElement : ObservableObject
             IsMeasureValid = false;
             DesiredSize = default;
             PreviousMeasure = null;
+
+            RootElement?.LayoutManager.InvalidateMeasure(this);
         }
     }
 
@@ -211,6 +257,8 @@ public class UiElement : ObservableObject
     {
         IsArrangeValid = false;
         PreviousArrange = null;
+
+        RootElement?.LayoutManager.InvalidateArrange(this);
     }
 
     public virtual void Render(IDrawingContext context, Rect bounds)
@@ -228,20 +276,6 @@ public class UiElement : ObservableObject
     public virtual UiElement GetChild(int index)
     {
         return null!;
-    }
-
-    public virtual T AttachChild<T>(T child) where T : UiElement
-    {
-        child.ParentElement = this;
-        return child;
-    }
-
-    public virtual void DetachParent()
-    {
-        UnsubscribePropertySubscribers();
-
-        var childCount = GetChildCount();
-        for (var i = 0; i < childCount; i++) GetChild(i).DetachParent();
     }
 
     /// <summary>

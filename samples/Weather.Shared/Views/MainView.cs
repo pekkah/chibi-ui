@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Buffers.Text;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
+using System.Threading;
 using Chibi.Ui.DataBinding;
 using Chibi.Ui.Views;
-using Chibi.Ui.Weather.Shared.OpenMeteo;
 using Meadow;
 using Meadow.Foundation.Graphics;
 
@@ -15,11 +10,12 @@ namespace Chibi.Ui.Weather.Shared.Views;
 
 public class MainView : WeatherViewBase
 {
+    private readonly Loader _loader = new();
+
     public MainView(IRenderingDetails details)
     {
-        Hours = new ReactiveProperty<ObservableCollection<UiElement>>("Hours", []);
-        Days = new ReactiveProperty<ObservableCollection<UiElement>>("Days", []);
-        Root = new DockPanel
+        TimeUntilNextUpdate = Property(nameof(TimeUntilNextUpdate), TimeSpan.FromSeconds(0));
+        Content = new DockPanel
         {
             LastChildFill = true,
             Children =
@@ -37,7 +33,7 @@ public class MainView : WeatherViewBase
                     [
                         new TextBlock
                         {
-                            Margin = new Thickness(3, 5, 5, 3),
+                            Margin = new Thickness(3, 2, 5, 3),
                             HorizontalContentAlignment = HorizontalAlignment.Center,
                             VerticalContentAlignment = VerticalAlignment.Center,
                             Text = "Chibi.Ui Weather".ToUpperInvariant(),
@@ -46,48 +42,81 @@ public class MainView : WeatherViewBase
                         },
                         new TextBlock
                         {
-                            Margin = new Thickness(0, 5, 3, 3),
+                            Margin = new Thickness(0, 2, 3, 3),
                             HorizontalContentAlignment = HorizontalAlignment.Center,
                             VerticalContentAlignment = VerticalAlignment.Center,
                             TextProperty =
                             {
-                                details.Fps.Select(i => $"FPS:{i}")
+                                details.Fps.Select(i => $"{i}")
                             },
                             Color = Color.DarkRed,
                             Font = new Font6x8()
                         }
                     ]
                 },
-                new TextBlock()
+                new UniformGrid()
                 {
-                    Height = 24,
-                    Padding = new Thickness(2),
-                    Background = new RectangleBrush()
+                    Columns = 2,
+                    Rows = 1,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    Background = new RectangleBrush
                     {
                         Color = Theme.SectionBackground,
                         Filled = true
                     },
-                    Color = Color.White,
-                    Font = new Font12x16(),
-                    Text = "Next 6 Hours".ToUpperInvariant(),
+                    Children =
+                    [
+                        new TextBlock
+                        {
+                            HorizontalContentAlignment = HorizontalAlignment.Left,
+                            VerticalContentAlignment = VerticalAlignment.Top,
+                            Height = 20,
+                            Padding = new Thickness(2),
+                            Color = Color.White,
+                            Font = new Font12x16(),
+                            TextProperty =
+                            {
+                                Loading.Select(i => i ? "Loading..." : "Next 6h".ToUpperInvariant())
+                                    .CombineLatest(
+                                        Error,
+                                        (loading, error) => !string.IsNullOrEmpty(error) ? error : loading
+                                    )
+                            }
+                        },
+                        new TextBlock
+                        {
+                            HorizontalContentAlignment = HorizontalAlignment.Right,
+                            VerticalContentAlignment = VerticalAlignment.Center,
+                            Margin = new Thickness(0, 0, 30, 0),
+                            Height = 20,
+                            Width = 40,
+                            Padding = new Thickness(2),
+                            Color = Color.White,
+                            Font = new Font12x16(),
+                            TextProperty =
+                            {
+                                TimeUntilNextUpdate.Select(i => $"{(int)i.TotalSeconds}s")
+                            }
+                        }
+                    ]
                 },
                 new UniformGrid
                 {
-                    Background = new RectangleBrush()
+                    Background = new RectangleBrush
                     {
                         Color = Theme.SectionBackground,
                         Filled = true
                     },
                     Columns = 3,
-                    Rows = 2,
                     ChildrenProperty =
                     {
                         Hours
                     }
                 },
-                new UniformGrid()
+                new UniformGrid
                 {
-                    Background = new RectangleBrush()
+                    Background = new RectangleBrush
                     {
                         Color = Color.FromHex("#0089c4"),
                         Filled = true
@@ -103,89 +132,43 @@ public class MainView : WeatherViewBase
         };
     }
 
-    public ReactiveProperty<ObservableCollection<UiElement>> Hours { get; }
+    private DateTime _lastUpdate;
 
-    public ReactiveProperty<ObservableCollection<UiElement>> Days { get; }
-
-    public override void Load()
+    private void Update()
     {
-        using var httpClient = new HttpClient();
+        var now = DateTime.Now;
+        var elapsed = now - _lastUpdate;
+        TimeUntilNextUpdate.Value = TimeUntilNextUpdate.Value.Subtract(elapsed);
 
-        // need to allow async in Load and Unload?
-        using var response = httpClient.GetAsync(
-            "https://api.open-meteo.com/v1/forecast?latitude=60.1695&longitude=24.9354&current=temperature_2m,relative_humidity_2m&hourly=temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto",
-            HttpCompletionOption.ResponseHeadersRead)
-            .Result;
-
-        var forecastString = response.Content.ReadAsStringAsync().Result;
-        var forecast = Utf8Json.JsonSerializer.Deserialize<MeteoResponse>(forecastString);
-
-        var hours = new List<UiElement>();
-        var start = forecast.hourly.time
-            .Select(DateTime.Parse)
-            .ToList()
-            .FindIndex(i => i.Hour == DateTime.Now.Hour);
-
-        for(int i = start; i < start + 6 ; i++)
+        if (TimeUntilNextUpdate.Value.TotalSeconds <= 0)
         {
-            var hour = DateTime.Parse(forecast.hourly.time[i]).Hour;
-            var temp = forecast.hourly.temperature_2m[i];
-            hours.Add(new HeaderContentControl
-            {
-                Height = 50,
-                HeaderFontColor = Theme.SectionTitle,
-                ValueFontColor = Color.White,
-                ValueFont = new Font12x16(),
-                Header = $"{hour}:00",
-                Value = $"{temp:F1}{forecast.hourly_units.temperature_2m}",
-                Background = new RectangleBrush()
-                {
-                    Color = Theme.SectionBackground.WithBrightness(0.4f),
-                    Filled = false,
-                    CornerRadius = 2
-                }
-            });
+            Resolver.Log.Info("Updateding...");
+            _ = _loader.Load();
+            TimeUntilNextUpdate.Value = TimeSpan.FromMinutes(5);
         }
 
-        Hours.Value = new ObservableCollection<UiElement>(hours);
+        _lastUpdate = now;
+    }
 
+    public override void Render(Renderer renderer)
+    {
+        Update();
+        base.Render(renderer);
+    }
 
-        var days = new List<UiElement>();
+    public ReactiveProperty<TimeSpan> TimeUntilNextUpdate { get; }
 
-        for (int i = 0; i < 7; i++)
-        {
-            var day = DateTime.Parse(forecast.daily.time[i]).DayOfWeek;
-            var max = forecast.daily.temperature_2m_max[i];
-            var min = forecast.daily.temperature_2m_min[i];
-            days.Add(new StackPanel()
-            {
-                Margin = new Thickness(2),
-                Height = 24,
-                Orientation = Orientation.Horizontal,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                [
-                    new TextBlock()
-                    {
-                        Width = 115,
-                        Text = day.ToString(),
-                        Font = new Font12x16(),
-                        Color = Color.White,
-                    },
-                    new TextBlock()
-                    {
-                        VerticalAlignment = VerticalAlignment.Center,
-                        VerticalContentAlignment = VerticalAlignment.Center,
-                        Height = 24,
-                        Text = $"{max:F1}-{min:F1}{forecast.daily_units.temperature_2m_min}",
-                        Font = new Font8x12(),
-                        Color = Color.White
-                    }
-                ]
-            });
-        }    
+    public IObservable<ObservableCollection<UiElement>> Hours => _loader.Hours;
 
-        Days.Value = new ObservableCollection<UiElement>(days);
+    public IObservable<ObservableCollection<UiElement>> Days => _loader.Days;
+
+    public IObservable<bool> Loading => _loader.Loading;
+
+    public IObservable<string?> Error => _loader.Error;
+
+    public override void Loaded()
+    {
+        base.Loaded();
     }
 
     public override void OnLeft()
@@ -204,5 +187,3 @@ public class MainView : WeatherViewBase
         clickable?.Click();
     }
 }
-
-

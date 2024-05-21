@@ -2,7 +2,11 @@
 
 public interface IViewController
 {
-    public UiElement Root { get; }
+    UiElement Content { get; }
+
+    FocusManager FocusManager { get; }
+
+    LayoutManager LayoutManager { get; }
 
     void Render(Renderer renderer);
 
@@ -11,4 +15,10 @@ public interface IViewController
     void Unload();
 
     void Load();
+
+    void Loaded();
+
+    void InvalidateLayout();
+
+    Size AllocatedSize { get; set; }
 }

@@ -9,17 +9,11 @@ public class IfElement : UiElement
     public IfElement()
     {
         IfProperty = Property(nameof(If), false);
-        TrueElementProperty = Property(nameof(TrueElement), (UiElement)new TextBlock()
-        {
-            Text = "True"
-        });
-        FalseElementProperty = Property(nameof(FalseElement), (UiElement)new TextBlock()
-        {
-            Text = "False"
-        });
+        TrueElementProperty = Property(nameof(TrueElement), (UiElement?)null);
+        FalseElementProperty = Property(nameof(FalseElement), (UiElement?)null);
 
-        TrueElement.Subscribe(_ => Invalidate());
-        FalseElement.Subscribe(_ => Invalidate());
+        TrueElementProperty.Subscribe(_ => Invalidate());
+        FalseElementProperty.Subscribe(_ => Invalidate());
         IfProperty.Subscribe(_ => Invalidate());
     }
 
@@ -27,23 +21,24 @@ public class IfElement : UiElement
     private void Invalidate()
     {
         Content = If ? TrueElement : FalseElement;
+        IsVisible = Content != null;
         InvalidateMeasure();
         InvalidateArrange();
     }
 
     protected UiElement? Content { get; set; }
 
-    public ReactiveProperty<UiElement> FalseElementProperty { get; }
+    public ReactiveProperty<UiElement?> FalseElementProperty { get; }
 
-    public UiElement FalseElement
+    public UiElement? FalseElement
     {
         get => FalseElementProperty.Value;
         set => FalseElementProperty.Value = value;
     }
 
-    public ReactiveProperty<UiElement> TrueElementProperty { get; }
+    public ReactiveProperty<UiElement?> TrueElementProperty { get; }
 
-    public UiElement TrueElement
+    public UiElement? TrueElement
     {
         get => TrueElementProperty.Value;
         set => TrueElementProperty.Value = value;
@@ -64,18 +59,26 @@ public class IfElement : UiElement
 
     public override int GetChildCount()
     {
-        return 1;
+        return Content != null ? 1 : 0;
     }
 
     protected override Size MeasureCore(Size availableSize)
     {
         Content?.Measure(availableSize);
-        return Content?.DesiredSize ?? availableSize;
+        return Content?.DesiredSize ?? new Size();
     }
 
     protected override void ArrangeCore(Rect finalRect)
     {
-        Content?.Arrange(finalRect);
-        Bounds = finalRect;
+        if (Content == null)
+        {
+            Bounds = new Rect();
+        }
+        else
+        {
+
+            Content?.Arrange(finalRect);
+            Bounds = finalRect;
+        }
     }
 }

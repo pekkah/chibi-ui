@@ -9,7 +9,7 @@ public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps)
 {
     public void HandleTouch(TouchPoint point)
     {
-        var targetElement = Renderer.HitTest(CurrentView.Root, new Point(point.ScreenX, point.ScreenY));
+        var targetElement = Renderer.HitTest(CurrentView.Content, new Point(point.ScreenX, point.ScreenY));
 
         if (targetElement == null)
             return;

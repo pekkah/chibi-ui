@@ -40,8 +40,10 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigation
             previousView.Unload();
         }
 
+        view.AllocatedSize = Renderer.DeviceBounds.Size;
         view.Load();
         ViewStack.Push(view);
+        view.Loaded();
     }
 
     public void Draw()
@@ -74,6 +76,7 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigation
                     Fps.Value = (int)frameCount;
                     frameCount = 0;
                     lastFpsUpdateTicks = Stopwatch.GetTimestamp();
+                    GC.Collect();
                 }
 
                 var delayTicks = nextFrameTicks - Stopwatch.GetTimestamp();

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.IO;
+using Meadow.Foundation.Serialization;
 
 namespace Chibi.Ui.Weather.Shared.OpenMeteo;
 
-
 public class MeteoResponse
 {
+    public static MeteoResponse FromJsonMicro(byte[] json) => MicroJson.Deserialize<MeteoResponse>(json);
+
     public float latitude { get; set; }
     public float longitude { get; set; }
     public float generationtime_ms { get; set; }

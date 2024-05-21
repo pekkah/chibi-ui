@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using Chibi.Ui.DataBinding;
@@ -21,17 +23,43 @@ public class Panel : UiElement
         set => ChildrenProperty.Value = value;
     }
 
+    private readonly List<IDisposable> _childDesiredSizeChanged = new();
+
     private void OnChildrenChanged(PropertyChangedEvent<ObservableCollection<UiElement>> children)
     {
         children.OldValue.CollectionChanged -= OnChildrenCollectionChanged;
         children.Value.CollectionChanged += OnChildrenCollectionChanged;
+
+        OnChildrenCollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, children.Value, children.OldValue));
     }
 
-    private void OnChildrenCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    protected virtual void OnChildrenCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
-        foreach (var oldItem in e.OldItems.OfType<UiElement>()) oldItem.DetachParent();
+        if (e.OldItems != null)
+        {
+            foreach (var oldItem in e.OldItems.OfType<UiElement>())
+            {
+                oldItem.ParentElement = null;
+                oldItem.RootElement = null;
+            }
+            _childDesiredSizeChanged.ForEach(x => x.Dispose());
+            _childDesiredSizeChanged.Clear();
+        }
 
-        foreach (var newItem in e.NewItems.OfType<UiElement>()) AttachChild(newItem);
+        if (e.NewItems != null)
+            foreach (var newItem in e.NewItems.OfType<UiElement>())
+            {
+                newItem.ParentElement = this;
+                newItem.RootElement = RootElement;
+                _childDesiredSizeChanged.Add(newItem.DesiredSizeProperty.Subscribe(_ =>
+                {
+                    InvalidateMeasure();
+                    InvalidateArrange();
+                }));
+            }
+
+        InvalidateMeasure();
+        InvalidateArrange();
     }
 
     public override int GetChildCount()

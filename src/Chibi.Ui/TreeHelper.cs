@@ -4,14 +4,17 @@ namespace Chibi.Ui;
 
 public class TreeHelper
 {
-    public static void Visit(UiElement root, System.Action<UiElement> visitor)
+    public static void Visit(UiElement root, System.Action<UiElement?, UiElement> visitor)
     {
-        visitor(root);
-        var count = root.GetChildCount();
-        for (var i = 0; i < count; i++)
+        VisitCore(null, root, visitor);
+
+        static void VisitCore(UiElement? parent, UiElement child, System.Action<UiElement?, UiElement> visitor)
         {
-            var child = root.GetChild(i);
-            Visit(child, visitor);
+            visitor(parent, child);
+            for (var i = 0; i < child.GetChildCount(); i++)
+            {
+                VisitCore(child, child.GetChild(i), visitor);
+            }
         }
     }
 

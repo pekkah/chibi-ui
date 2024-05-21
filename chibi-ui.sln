@@ -5,18 +5,20 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chibi.Ui", "src\Chibi.Ui\Chibi.Ui.csproj", "{85D8D7DC-F212-497B-A9C6-17DDE43A0150}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weather", "samples\Weather\Weather.csproj", "{9A08CDCD-44A1-4439-9CF8-5DC1ADA1F55A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Weather", "samples\Weather\Weather.csproj", "{9A08CDCD-44A1-4439-9CF8-5DC1ADA1F55A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{96DD1CA6-DFB4-4B3E-BB4B-53A9C465A1FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weather.F7", "samples\Weather.F7\Weather.F7.csproj", "{86453EF6-18B7-4C24-B1CB-41724A543F60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Weather.F7", "samples\Weather.F7\Weather.F7.csproj", "{86453EF6-18B7-4C24-B1CB-41724A543F60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weather.Shared", "samples\Weather.Shared\Weather.Shared.csproj", "{BCF9A4AD-4692-49CE-ACEB-6852BB28516D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Weather.Shared", "samples\Weather.Shared\Weather.Shared.csproj", "{BCF9A4AD-4692-49CE-ACEB-6852BB28516D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DB3242E0-EA67-4AD6-8FF4-023B70DDB615}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chibi.Ui.Tests", "tests\Chibi.Ui.Tests\Chibi.Ui.Tests.csproj", "{238BB094-E33F-450A-AF2F-0DE41184D271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +42,10 @@ Global
 		{BCF9A4AD-4692-49CE-ACEB-6852BB28516D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCF9A4AD-4692-49CE-ACEB-6852BB28516D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCF9A4AD-4692-49CE-ACEB-6852BB28516D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{238BB094-E33F-450A-AF2F-0DE41184D271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{238BB094-E33F-450A-AF2F-0DE41184D271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{238BB094-E33F-450A-AF2F-0DE41184D271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{238BB094-E33F-450A-AF2F-0DE41184D271}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

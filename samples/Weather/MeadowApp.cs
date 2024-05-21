@@ -6,7 +6,7 @@ using Chibi.Ui.Views;
 using Chibi.Weather.Shared;
 using Meadow.Foundation.Sensors.Hid;
 using System.Threading;
-using Chibi.Ui.Weather;
+using Chibi.Ui;
 using Chibi.Ui.Weather.Shared;
 using Chibi.Ui.Weather.Shared.Views;
 
@@ -27,7 +27,7 @@ namespace Weather
 
             Device.Display?.Resize(240, 320);
 
-            var graphicsDevice = new DesktopGraphicsDevice(Device.Display);
+            var graphicsDevice = new PixelDisplayDevice(Device.Display);
             ViewManager = new ViewManager(graphicsDevice, 60);
             Resolver.Services.Add<INavigationController>(ViewManager);
             Resolver.Services.Add<IRenderingDetails>(ViewManager);
