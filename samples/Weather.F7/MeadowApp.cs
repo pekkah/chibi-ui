@@ -11,11 +11,12 @@ using Meadow.Foundation.Displays;
 using Meadow.Foundation.Sensors.Hid;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
-using Meadow.Units;
 using Chibi.Ui.Weather.F7;
 using Chibi.Ui.Weather.Shared.Views;
 using Meadow.Foundation.Graphics.MicroLayout;
 using System.Threading;
+using Meadow.Foundation.Graphics;
+using Meadow.Units;
 
 namespace Weather.F7
 {
@@ -25,19 +26,6 @@ namespace Weather.F7
 
         public override async Task Initialize()
         {
-            Resolver.Log.Info("Checking connection...");
-            var networkConnected = new TaskCompletionSource<object>();
-            Device.NetworkConnected += (s, e) =>
-            {
-                networkConnected.SetResult(null);
-            };
-
-            if (Device.NetworkAdapters.Any(n => n.IsConnected))
-                networkConnected.SetResult(null);
-
-            await networkConnected.Task;
-            Resolver.Log.Info("Network connected");
-
             Resolver.Log.Info("Initialize...");
 
             _onboardLed = new RgbPwmLed(
@@ -59,11 +47,11 @@ namespace Weather.F7
             Display.SetRotation(RotationType._180Degrees);
             Display.SpiBusSpeed = new Frequency(20, Frequency.UnitType.Megahertz);
 
+            DrawText(Display, "Initializing...");
             TouchScreen = new Xpt2046(
                 Device.CreateSpiBus(),
-                Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeBoth, ResistorMode.InternalPullUp),
+                Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeFalling, ResistorMode.InternalPullUp),
                 Device.Pins.D11.CreateDigitalOutputPort(true));
-
 
             Resolver.Log.Info($"Initializing {this.GetType().Name}");
             Resolver.Log.Info($" Platform OS is a {Device.PlatformOS.GetType().Name}");
@@ -92,6 +80,14 @@ namespace Weather.F7
             await base.Initialize();
         }
 
+        private void DrawText(Ili9341 display, string text)
+        {
+            var g = new MicroGraphics(display);
+            g.Clear();
+            g.DrawText(Display.Width / 2 - (g.MeasureText(text).Width / 2), Display.Height  / 2 - (g.MeasureText(text).Height / 2), text, Color.White);
+            g.Show();
+        }
+
         public Xpt2046 TouchScreen { get; set; }
 
         public Ili9341 Display { get; set; }
@@ -101,8 +97,11 @@ namespace Weather.F7
         public override async Task Run()
         {
             Resolver.Log.Info("Run...");
+            await WaitForNetwork();
 
             var ts = new TouchscreenCalibrationService(new DisplayScreen(Display, RotationType._180Degrees, TouchScreen));
+            ts.EraseCalibrationData();
+
             var calData = ts.GetSavedCalibrationData();
             if (calData != null)
             {
@@ -121,15 +120,17 @@ namespace Weather.F7
                 ViewManager.HandleTouch(e);
             };
 
+            Resolver.Log.Info("Starting ViewManager");
+            DrawText(Display, "Loading...");
             ViewManager.Navigate<MainView>();
             var cts = new CancellationTokenSource();
             ViewManager.Start(cts.Token);
 
-
+            Resolver.Log.Info("ViewManager started.");
             await CycleColors(TimeSpan.FromMilliseconds(5000));
         }
 
-        async Task CycleColors(TimeSpan duration)
+        private async Task CycleColors(TimeSpan duration)
         {
             Resolver.Log.Info("Cycle colors...");
 
@@ -150,10 +151,27 @@ namespace Weather.F7
             }
         }
 
-        async Task ShowColorPulse(Color color, TimeSpan duration)
+        private async Task ShowColorPulse(Color color, TimeSpan duration)
         {
             await _onboardLed.StartPulse(color, duration / 2);
             await Task.Delay(duration);
+        }
+
+        private async Task WaitForNetwork()
+        {
+            Resolver.Log.Info("Checking connection...");
+            DrawText(Display, "Connecting...");
+            if (!Device.NetworkAdapters.Any(n => n.IsConnected))
+            {
+                while (!Device.NetworkAdapters.Any(n => n.IsConnected))
+                {
+                    Resolver.Log.Info("Waiting connection...");
+                    await Task.Delay(TimeSpan.FromSeconds(2));
+                }
+            }
+
+            Resolver.Log.Info("Network connected");
+            DrawText(Display, "Connected.");
         }
     }
 }
