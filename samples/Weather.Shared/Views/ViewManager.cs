@@ -9,11 +9,14 @@ public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps)
 {
     public void HandleTouch(TouchPoint point)
     {
-        var targetElement = Renderer.HitTest(CurrentView.Content, new Point(point.ScreenX, point.ScreenY));
+        var hitTestResult = Renderer.HitTest(
+            CurrentView.Content, 
+            point);
 
-        if (targetElement == null)
+        if (hitTestResult == null)
             return;
 
+        var targetElement = hitTestResult.Element;
         var clickable = TreeHelper.FindReverse(targetElement, e => e is IClickable) as IClickable;
 
         switch (clickable)
@@ -25,7 +28,7 @@ public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps)
                 break;
         }
 
-        clickable.Click();
+        clickable.Click(hitTestResult);
     }
 
     public virtual void OnBack()

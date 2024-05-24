@@ -2,5 +2,5 @@
 
 public interface IClickable
 {
-    void Click();
+    void Click(HitTestResult? point = default);
 }

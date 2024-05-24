@@ -17,8 +17,6 @@ public class Loader
     private readonly LightweightSubject<string?> _error = new();
     private readonly LightweightSubject<ObservableCollection<UiElement>> _hours = new();
 
-    private readonly HttpClient _httpClient = new();
-
     private readonly LightweightSubject<bool> _loading = new();
 
     public Loader()
@@ -44,8 +42,9 @@ public class Loader
             Resolver.Log.Info("Loading weather data");
             var stopwatch = Stopwatch.StartNew();
 
+            var httpClient = new HttpClient();
             // need to allow async in Load and Unload?
-            var response = await _httpClient.GetAsync(
+            var response = await httpClient.GetAsync(
                 "https://api.open-meteo.com/v1/forecast?latitude=60.1695&longitude=24.9354&current=temperature_2m,relative_humidity_2m&hourly=temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto",
                 HttpCompletionOption.ResponseContentRead);
 
@@ -57,6 +56,7 @@ public class Loader
             var bytes = await response.Content.ReadAsByteArrayAsync();
             var forecast = MeteoResponse.FromJsonMicro(bytes);
             response.Dispose();
+            httpClient.Dispose();
             GC.Collect();
             Resolver.Log.Info(
                 $"After Weather data parsed: {stopwatch.Elapsed.TotalSeconds}s ({GC.GetTotalMemory(false)})b");

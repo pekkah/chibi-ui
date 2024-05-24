@@ -1,6 +1,7 @@
 ﻿using System;
 using Chibi.Ui.DataBinding;
 using Meadow;
+using Meadow.Foundation.Graphics;
 
 namespace Chibi.Ui;
 
@@ -92,7 +93,7 @@ public class Button : ContentControl<string>, IFocusable, IClickable
 
     public ICommand? Command { get; set; }
 
-    public void Click()
+    public void Click(HitTestResult? point)
     {
         Command?.Execute();
     }

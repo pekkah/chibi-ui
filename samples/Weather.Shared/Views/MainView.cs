@@ -183,6 +183,6 @@ public class MainView : WeatherViewBase
     public override void OnEnter()
     {
         var clickable = FocusManager.Current as IClickable;
-        clickable?.Click();
+        clickable?.Click(null);
     }
 }

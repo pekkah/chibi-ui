@@ -8,9 +8,16 @@ using Meadow;
 
 namespace Chibi.Ui.Views;
 
-public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigationController, IRenderingDetails where TViewBase: IViewController
+public interface IRenderingControl
+{
+    void Pause();
+    void Resume();
+}
+
+public abstract class ViewManagerBase<TViewBase> : ObservableObject, IRenderingControl, INavigationController, IRenderingDetails where TViewBase: IViewController
 {
     private readonly Color _clearColor;
+    private bool _paused;
 
     protected ViewManagerBase(IGraphicsDevice graphicsDevice, int maxFps, Color clearColor)
     {
@@ -30,8 +37,20 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigation
 
     public ReactiveProperty<int> Fps { get; }
 
+    public void Pause()
+    {
+        _paused = true;
+    }
+
+    public void Resume()
+    {
+        _paused = false;
+    }
+
     public void Navigate<T>() where T: IViewController
     {
+        Resolver.Log.Info($"Navigating to {typeof(T).Name}");
+        Pause();
         if (Resolver.Services.GetOrCreate<T>() is not TViewBase view)
             throw new InvalidOperationException($"View {typeof(T).Name} does not implement {typeof(TViewBase).Name}");
 
@@ -44,6 +63,7 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigation
         view.Load();
         ViewStack.Push(view);
         view.Loaded();
+        Resume();
     }
 
     public void Draw()
@@ -51,6 +71,13 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, INavigation
         Renderer.Clear(_clearColor);
         CurrentView.Render(Renderer);
         Renderer.Show();
+        if (_paused)
+        {
+            while (_paused)
+            {
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            }
+        }
     }
 
     public void Start(CancellationToken cancellationToken)

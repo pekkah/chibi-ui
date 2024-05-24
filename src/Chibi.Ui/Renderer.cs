@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using Meadow;
 using Meadow.Foundation.Graphics;
+using Meadow.Hardware;
 
 namespace Chibi.Ui;
 
@@ -34,23 +36,30 @@ public class Renderer(IGraphicsDevice graphicsDevice)
         }
     }
 
-    public UiElement? HitTest(UiElement element, Point point)
+    public HitTestResult? HitTest(UiElement element, TouchPoint point)
     {
-        List<UiElement> hitElements = [];
+        List<HitTestResult> hitElements = [];
         HitTestElement(element, point, element.Bounds, hitElements);
 
         return hitElements.LastOrDefault();
 
-        static void HitTestElement(UiElement element, Point hitPoint, Rect parentBounds, List<UiElement> hitElements)
+        static void HitTestElement(UiElement element, TouchPoint hitPoint, Rect parentBounds, List<HitTestResult> hitElements)
         {
             var elementBounds = element.Bounds.Translate(parentBounds.Position);
 
-            if (!elementBounds.Contains(hitPoint))
+            if (!elementBounds.Contains(new Point(hitPoint.ScreenX, hitPoint.ScreenY)))
             {
                 return;
             }
 
-            hitElements.Add(element);
+            var elementHitPoint = new HitTestResult()
+            {
+                Element = element, 
+                HitPoint = hitPoint,
+                LocalPoint = new Point(hitPoint.ScreenX - elementBounds.X, hitPoint.ScreenY - elementBounds.Y)
+            };
+    
+            hitElements.Add(elementHitPoint);
 
             var count = element.GetChildCount();
             for (var i = 0; i < count; i++)
@@ -70,4 +79,13 @@ public class Renderer(IGraphicsDevice graphicsDevice)
     {
         graphicsDevice.Clear(clearColor);
     }
+}
+
+public class HitTestResult
+{
+    public UiElement Element { get; set; }
+
+    public TouchPoint HitPoint { get; set; }
+
+    public Point LocalPoint { get; set; }
 }
