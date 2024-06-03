@@ -6,6 +6,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Icons\cloudy.bmp" />
+    <None Remove="Icons\rain.bmp" />
+    <None Remove="Icons\rainy_color.bmp" />
+    <None Remove="Icons\sun.bmp" />
+    <None Remove="Icons\sunny_color.bmp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\cloudy.bmp" />
+    <EmbeddedResource Include="Icons\rain.bmp" />
+    <EmbeddedResource Include="Icons\rainy_color.bmp" />
+    <EmbeddedResource Include="Icons\sun.bmp" />
+    <EmbeddedResource Include="Icons\sunny_color.bmp" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Chibi.Ui\Chibi.Ui.csproj" />
   </ItemGroup>
 

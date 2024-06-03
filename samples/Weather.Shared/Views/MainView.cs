@@ -9,10 +9,11 @@ namespace Chibi.Ui.Weather.Shared.Views;
 
 public class MainView : WeatherViewBase
 {
-    private readonly Loader _loader = new();
+    private readonly Loader _loader;
 
-    public MainView(IRenderingDetails details)
+    public MainView(IRenderingDetails details, AssetManager assets)
     {
+        _loader = new Loader(assets);
         TimeUntilNextUpdate = Property(nameof(TimeUntilNextUpdate), TimeSpan.FromSeconds(0));
         Content = new DockPanel
         {

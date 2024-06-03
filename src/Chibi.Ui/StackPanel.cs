@@ -9,6 +9,10 @@ public class StackPanel : Panel
     {
         OrientationProperty = Property(nameof(Orientation), Orientation.Vertical);
         SpacingProperty = Property(nameof(Spacing), 0);
+        AffectsArrange<int>(SpacingProperty);
+        AffectsMeasure<int>(SpacingProperty);
+        AffectsArrange<Orientation>(OrientationProperty);
+        AffectsMeasure<Orientation>(OrientationProperty);
     }
 
     public ReactiveProperty<int> SpacingProperty { get; set; }

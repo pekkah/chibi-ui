@@ -13,14 +13,16 @@ namespace Chibi.Ui.Weather.Shared.Views;
 
 public class Loader
 {
+    private readonly AssetManager _assets;
     private readonly LightweightSubject<ObservableCollection<UiElement>> _days = new();
     private readonly LightweightSubject<string?> _error = new();
     private readonly LightweightSubject<ObservableCollection<UiElement>> _hours = new();
 
     private readonly LightweightSubject<bool> _loading = new();
 
-    public Loader()
+    public Loader(AssetManager assets)
     {
+        _assets = assets;
         _loading.Next(true);
         _error.Next(null);
     }
@@ -99,6 +101,7 @@ public class Loader
                 var day = DateTime.Parse(forecast.daily.time[i]).DayOfWeek;
                 var max = forecast.daily.temperature_2m_max[i];
                 var min = forecast.daily.temperature_2m_min[i];
+                var condition = forecast.daily.weather_code[i];
                 days.Add(new StackPanel
                 {
                     Margin = new Thickness(2),
@@ -113,6 +116,11 @@ public class Loader
                             Text = day.ToString(),
                             Font = new Font12x16(),
                             Color = Color.White
+                        },
+                        new Image()
+                        {
+                            Source = _assets.FromResource<Loader>($"Chibi.Ui.Weather.Shared.Icons.sun.bmp"),
+                            TransparencyColor = new Color(0,0,0,0)
                         },
                         new TextBlock
                         {

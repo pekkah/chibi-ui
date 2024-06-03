@@ -13,9 +13,8 @@ public class UniformGrid : Panel
         RowsProperty = Property(nameof(Rows), 0);
         ColumnsProperty = Property(nameof(Columns), 0);
         FirstColumnProperty = Property(nameof(FirstColumn), 0);
-        ChildrenProperty.Subscribe(_ => InvalidateMeasure());
-        RowsProperty.Subscribe(_ => InvalidateMeasure());
-        ColumnsProperty.Subscribe(_ => InvalidateMeasure());
+        AffectsMeasure<int>(RowsProperty);
+        AffectsMeasure<int>(ColumnsProperty);
     }
 
     /// <summary>

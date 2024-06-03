@@ -21,15 +21,15 @@ public class Style<T>: ObservableObject, IEnumerable where T : UiElement
 
     public void Add<TV>(Func<T, ReactiveProperty<TV>> getProperty, TV value)
     {
-        Func<T, Action> apply = (T target) =>
+        Action ApplyProperty(T target)
         {
             var property = getProperty(target);
             var previousValue = property.Value;
             property.Value = value;
-            return  () => property.Value = previousValue;
-        };
+            return () => property.Value = previousValue;
+        }
 
-        _setters.Add(apply);
+        _setters.Add(ApplyProperty);
     }
 
     public void Remove(T element)

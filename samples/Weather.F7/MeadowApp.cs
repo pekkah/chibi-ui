@@ -71,6 +71,10 @@ public class MeadowApp : App<F7FeatherV2>
         Resolver.Services.Add<IRenderingControl>(ViewManager);
         Resolver.Services.Add<ICalibratableTouchscreen>(TouchScreen);
 
+        // AssetManager
+        var assetManager = new AssetManager(graphicsDevice);
+        Resolver.Services.Add(assetManager);
+
         // Views
         Resolver.Services.Create<MainView>();
         Resolver.Services.Create<CalibrationView>();

@@ -36,6 +36,10 @@ namespace Weather
             if (Device.Display is ITouchScreen touchScreen)
                 EnableTouchScreen(touchScreen);
 
+            // AssetManager
+            var assetManager = new AssetManager(graphicsDevice);
+            Resolver.Services.Add(assetManager);
+
             // Views
             Resolver.Services.Create<MainView>();
 
