@@ -1,13 +1,15 @@
 ﻿using Chibi.Ui.Views;
-using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
 
 namespace Chibi.Ui.Weather.Shared.Views;
 
-public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps) 
+public class WeatherViewManager(
+    IGraphicsDevice graphicsDevice, 
+    int maxFps,
+    ITouchScreen touchScreen) 
     : ViewManagerBase<WeatherViewBase>(graphicsDevice, maxFps, Theme.ScreenBackground)
 {
-    public void HandleTouch(TouchPoint point)
+    public void OnTouchUp(TouchPoint point)
     {
         var hitTestResult = Renderer.HitTest(
             CurrentView.Content, 
@@ -29,6 +31,19 @@ public class ViewManager(IGraphicsDevice graphicsDevice, int maxFps)
         }
 
         clickable.Click(hitTestResult);
+    }
+
+    public override void Draw()
+    {
+        if (touchScreen.IsTouched)
+        {
+            Pause();
+        }
+        else
+        {
+            Resume();
+        }
+        base.Draw();
     }
 
     public virtual void OnBack()

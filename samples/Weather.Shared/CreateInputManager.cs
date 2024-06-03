@@ -5,7 +5,7 @@ namespace Chibi.Ui.Weather.Shared;
 
 public static partial class W
 {
-    public static InputManager<Actions> CreateInputManager(ViewManager viewManager)
+    public static InputManager<Actions> CreateInputManager(WeatherViewManager viewManager)
     {
         var inputManager = new InputManager<Actions>();
         inputManager.AddAction(Actions.Back, viewManager.OnBack);

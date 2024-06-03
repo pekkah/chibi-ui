@@ -3,19 +3,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Chibi.Ui;
 using Chibi.Ui.Views;
-using Chibi.Ui.Weather.F7;
 using Chibi.Ui.Weather.Shared.Views;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
-using Meadow.Foundation.Graphics.MicroLayout;
 using Meadow.Foundation.Leds;
 using Meadow.Foundation.Sensors.Hid;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Leds;
-using Meadow.Units;
 
 namespace Weather.F7;
 
@@ -23,35 +20,16 @@ public class MeadowApp : App<F7FeatherV2>
 {
     private RgbPwmLed _onboardLed;
 
-    private TaskCompletionSource<object> _wifiConnected = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-    public MeadowApp()
-    {
-        Device.NetworkAdapters.NetworkConnected += (sender, args) => { _wifiConnected.TrySetResult(null); };
-
-        Device.NetworkAdapters.NetworkDisconnected += (sender, args) =>
-        {
-            _wifiConnected = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-        };
-    }
 
     public Xpt2046 TouchScreen { get; set; }
 
     public Ili9341 Display { get; set; }
 
-    public ViewManager ViewManager { get; private set; }
+    public WeatherViewManager ViewManager { get; private set; }
 
     public override async Task Initialize()
     {
         Resolver.Log.Info("Initialize...");
-
-        var wifi = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
-        //wifi.SetAntenna(AntennaType.External, true);
-
-        if (wifi.IsConnected)
-        {
-            _wifiConnected.SetResult(null);
-        }
 
         _onboardLed = new RgbPwmLed(
             Device.Pins.OnboardLedRed,
@@ -76,7 +54,7 @@ public class MeadowApp : App<F7FeatherV2>
         DrawText(Display, "Initializing...");
         TouchScreen = new Xpt2046(
             spiBus,
-            Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeFalling, ResistorMode.InternalPullUp),
+            Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeBoth, ResistorMode.InternalPullUp),
             Device.Pins.D11.CreateDigitalOutputPort(true));
 
         Resolver.Log.Info($"Initializing {GetType().Name}");
@@ -87,7 +65,7 @@ public class MeadowApp : App<F7FeatherV2>
         Resolver.Log.Info($" Processor: {Device.Information.ProcessorType}");
 
         var graphicsDevice = new PixelDisplayDevice(Display);
-        ViewManager = new ViewManager(graphicsDevice, 1);
+        ViewManager = new WeatherViewManager(graphicsDevice, 10, TouchScreen);
         Resolver.Services.Add<INavigationController>(ViewManager);
         Resolver.Services.Add<IRenderingDetails>(ViewManager);
         Resolver.Services.Add<IRenderingControl>(ViewManager);
@@ -98,7 +76,7 @@ public class MeadowApp : App<F7FeatherV2>
         Resolver.Services.Create<CalibrationView>();
 
         // Input
-        /*var inputManager = W.CreateInputManager(ViewManager);
+        /*var inputManager = W.CreateInputManager(WeatherViewManager);
         inputManager.MapAction(keyboard.Pins.Left.CreateDigitalInterruptPort(InterruptMode.EdgeRising), Actions.Left);
         inputManager.MapAction(keyboard.Pins.Right.CreateDigitalInterruptPort(InterruptMode.EdgeRising), Actions.Right);
         inputManager.MapAction(keyboard.Pins.Up.CreateDigitalInterruptPort(InterruptMode.EdgeRising), Actions.Up);
@@ -124,61 +102,56 @@ public class MeadowApp : App<F7FeatherV2>
     public override async Task Run()
     {
         Resolver.Log.Info("Run...");
+        await WaitForNetwork();
         GC.Collect();
 
         TouchScreen.TouchUp += (s, e) =>
         {
             Resolver.Log.Info($"Touch Up: {e.ScreenX}, {e.ScreenY}");
-            ViewManager.HandleTouch(e);
+            ViewManager.OnTouchUp(e);
         };
 
         TouchScreen.TouchDown += (s, e) =>
         {
             Resolver.Log.Info($"Touch Down: {e.ScreenX}, {e.ScreenY}");
-            //ViewManager.HandleTouch(e);
+            //WeatherViewManager.OnTouchUp(e);
         };
 
         TouchScreen.TouchMoved += (s, e) =>
         {
             Resolver.Log.Info($"Touch Move: {e.ScreenX}, {e.ScreenY}");
-            //ViewManager.HandleTouch(e);
+            //WeatherViewManager.OnTouchUp(e);
         };
 
         TouchScreen.TouchClick += (s, e) =>
         {
             Resolver.Log.Info($"Touch Click: {e.ScreenX}, {e.ScreenY}");
-            //ViewManager.HandleTouch(e);
+            //WeatherViewManager.OnTouchUp(e);
         };
 
-        GC.Collect();
-        Resolver.Log.Info("Starting ViewManager");
+        Resolver.Log.Info("Starting WeatherViewManager");
         DrawText(Display, "Loading...");
-        ViewManager.Navigate<CalibrationView>();
+        /*  There's an issue with touch screen sharing the same SPI bus with the display. It's not working.
+         * The Meadow team is working on a fix. Manual push buttons for navigation will be used for now when needed.
+         *
+         *
+         * ViewManager.Navigate<CalibrationView>();
+         */
+        ViewManager.Navigate<MainView>();
         var cts = new CancellationTokenSource();
         ViewManager.Start(cts.Token);
 
-        Resolver.Log.Info("ViewManager started.");
+        Resolver.Log.Info("WeatherViewManager started.");
         await CycleColors(TimeSpan.FromMilliseconds(5000));
     }
 
     private async Task CycleColors(TimeSpan duration)
     {
-        Resolver.Log.Info("Cycle colors...");
-
         while (true)
         {
             await ShowColorPulse(Color.Blue, duration);
             await ShowColorPulse(Color.Cyan, duration);
             await ShowColorPulse(Color.Green, duration);
-            await ShowColorPulse(Color.GreenYellow, duration);
-            await ShowColorPulse(Color.Yellow, duration);
-            await ShowColorPulse(Color.Orange, duration);
-            await ShowColorPulse(Color.OrangeRed, duration);
-            await ShowColorPulse(Color.Red, duration);
-            await ShowColorPulse(Color.MediumVioletRed, duration);
-            await ShowColorPulse(Color.Purple, duration);
-            await ShowColorPulse(Color.Magenta, duration);
-            await ShowColorPulse(Color.Pink, duration);
         }
     }
 
@@ -197,7 +170,7 @@ public class MeadowApp : App<F7FeatherV2>
 
         if (!wifi.IsConnected)
         {
-            await _wifiConnected.Task;
+            await wifi.ConnectToDefaultAccessPoint(TimeSpan.FromMinutes(2), CancellationToken.None);
             GC.Collect();
         }
 

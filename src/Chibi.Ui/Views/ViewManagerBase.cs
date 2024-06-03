@@ -66,7 +66,7 @@ public abstract class ViewManagerBase<TViewBase> : ObservableObject, IRenderingC
         Resume();
     }
 
-    public void Draw()
+    public virtual void Draw()
     {
         Renderer.Clear(_clearColor);
         CurrentView.Render(Renderer);

@@ -14,7 +14,7 @@ namespace Weather
 {
     public class MeadowApp : App<Desktop>
     {
-        public ViewManager ViewManager { get; private set; }
+        public WeatherViewManager ViewManager { get; private set; }
 
         public override Task Initialize()
         {
@@ -28,7 +28,7 @@ namespace Weather
             Device.Display?.Resize(240, 320);
 
             var graphicsDevice = new PixelDisplayDevice(Device.Display);
-            ViewManager = new ViewManager(graphicsDevice, 60);
+            ViewManager = new WeatherViewManager(graphicsDevice, 60, Device.Display as ITouchScreen);
             Resolver.Services.Add<INavigationController>(ViewManager);
             Resolver.Services.Add<IRenderingDetails>(ViewManager);
             Resolver.Services.Add(Device.Display);
@@ -56,7 +56,7 @@ namespace Weather
         {
             touchScreen.TouchClick += (sender, point) =>
             {
-                ViewManager.HandleTouch(point);
+                ViewManager.OnTouchUp(point);
             };
         }
 
