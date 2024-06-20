@@ -30,6 +30,27 @@ public class PixelDisplayDevice(IPixelDisplay display) : IGraphicsDevice
         };
     }
 
+    public virtual IPixelBuffer CreateBuffer(int width, int height, byte[] bytes)
+    {
+        return display.ColorMode switch
+        {
+            ColorMode.Format1bpp => new Buffer1bpp(width, height, bytes),
+            ColorMode.Format16bppRgb565 => new BufferRgb565(width, height, bytes),
+            ColorMode.Format24bppRgb888 => new BufferRgb888(width, height, bytes),
+            ColorMode.Format4bppGray => new BufferGray4(width, height, bytes),
+            ColorMode.Format2bpp => throw new NotSupportedException(),
+            ColorMode.Format4bppIndexed => new BufferIndexed4(width, height, bytes),
+            ColorMode.Format8bppGray => new BufferGray8(width, height, bytes),
+            ColorMode.Format8bppRgb332 => new BufferRgb332(width, height, bytes),
+            ColorMode.Format12bppRgb444 => new BufferRgb444(width, height, bytes),
+            ColorMode.Format16bppRgb555 => throw new NotSupportedException(),
+            ColorMode.Format18bppRgb666 => throw new NotSupportedException(),
+            ColorMode.Format24bppGrb888 => throw new NotSupportedException(),
+            ColorMode.Format32bppRgba8888 => new BufferRgba8888(width, height, bytes),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
     public IPixelBuffer FrameBuffer => display.PixelBuffer;
 
     public virtual void Show()

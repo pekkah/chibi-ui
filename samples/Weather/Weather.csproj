@@ -11,14 +11,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Meadow.Desktop" Version="1.12.0" />
-        <PackageReference Include="Meadow.Foundation" Version="1.12.0" />
-        <PackageReference Include="Meadow.Foundation.Graphics.MicroLayout" Version="1.12.0" />
-        <PackageReference Include="Meadow.Foundation.Sensors.Hid.Keyboard" Version="1.12.0" />
+        <PackageReference Include="Meadow.Desktop" Version="1.12.2.1-beta" />
+        <PackageReference Include="Meadow.Foundation" Version="1.12.2.1-beta" />
+        <PackageReference Include="Meadow.Foundation.Graphics.MicroLayout" Version="1.12.2.1-beta" />
+        <PackageReference Include="Meadow.Foundation.Sensors.Hid.Keyboard" Version="1.12.2.1-beta" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Chibi.Ui\Chibi.Ui.csproj" />
+      <ProjectReference Include="..\..\src\Drivers.Desktop\Drivers.Desktop.csproj" />
+      <ProjectReference Include="..\..\src\Drivers\Drivers.csproj" />
       <ProjectReference Include="..\Weather.Shared\Weather.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.139" />
     </ItemGroup>
 </Project>

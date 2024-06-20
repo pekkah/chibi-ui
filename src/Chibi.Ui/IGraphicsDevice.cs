@@ -7,7 +7,9 @@ public interface IGraphicsDevice
 {
     IPixelBuffer FrameBuffer { get; }
 
-    public IPixelBuffer CreateBuffer(int width, int height);
+    int Width => FrameBuffer.Width;
+
+    int Height => FrameBuffer.Height;
 
     void Show();
 
@@ -17,7 +19,7 @@ public interface IGraphicsDevice
 
     IDrawingContext CreateDrawingContext();
 
-    int Width => FrameBuffer.Width;
+    IPixelBuffer CreateBuffer(int width, int height);
 
-    int Height => FrameBuffer.Height;
+    IPixelBuffer CreateBuffer(int width, int height, byte[] bytes);
 }

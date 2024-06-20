@@ -7,22 +7,25 @@
 
   <ItemGroup>
     <None Remove="Icons\cloudy.bmp" />
+    <None Remove="Icons\cloudy_color.jpg" />
     <None Remove="Icons\rain.bmp" />
     <None Remove="Icons\rainy_color.bmp" />
     <None Remove="Icons\sun.bmp" />
     <None Remove="Icons\sunny_color.bmp" />
+    <None Remove="Icons\sunny_color.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Icons\cloudy.bmp" />
-    <EmbeddedResource Include="Icons\rain.bmp" />
-    <EmbeddedResource Include="Icons\rainy_color.bmp" />
-    <EmbeddedResource Include="Icons\sun.bmp" />
-    <EmbeddedResource Include="Icons\sunny_color.bmp" />
+    <EmbeddedResource Include="Icons\cloudy_color.jpg" />
+    <EmbeddedResource Include="Icons\sunny_color.jpg" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Chibi.Ui\Chibi.Ui.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.139" />
   </ItemGroup>
 
 </Project>

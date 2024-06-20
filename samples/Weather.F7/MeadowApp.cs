@@ -52,10 +52,10 @@ public class MeadowApp : App<F7FeatherV2>
         //Display.SpiBusSpeed = new Frequency(20, Frequency.UnitType.Megahertz);
 
         DrawText(Display, "Initializing...");
-        TouchScreen = new Xpt2046(
+        /*TouchScreen = new Xpt2046(
             spiBus,
             Device.Pins.D10.CreateDigitalInterruptPort(InterruptMode.EdgeBoth, ResistorMode.InternalPullUp),
-            Device.Pins.D11.CreateDigitalOutputPort(true));
+            Device.Pins.D11.CreateDigitalOutputPort(true));*/
 
         Resolver.Log.Info($"Initializing {GetType().Name}");
         Resolver.Log.Info($" Platform OS is a {Device.PlatformOS.GetType().Name}");
@@ -64,12 +64,13 @@ public class MeadowApp : App<F7FeatherV2>
         Resolver.Log.Info($" Model: {Device.Information.Model}");
         Resolver.Log.Info($" Processor: {Device.Information.ProcessorType}");
 
+        //var graphicsDevice = new DiffingPixelDisplayDevice(Display, new PixelDisplayDevice(Display));
         var graphicsDevice = new PixelDisplayDevice(Display);
-        ViewManager = new WeatherViewManager(graphicsDevice, 10, TouchScreen);
+        ViewManager = new WeatherViewManager(graphicsDevice, 30, TouchScreen);
         Resolver.Services.Add<INavigationController>(ViewManager);
         Resolver.Services.Add<IRenderingDetails>(ViewManager);
         Resolver.Services.Add<IRenderingControl>(ViewManager);
-        Resolver.Services.Add<ICalibratableTouchscreen>(TouchScreen);
+        //Resolver.Services.Add<ICalibratableTouchscreen>(TouchScreen);
 
         // AssetManager
         var assetManager = new AssetManager(graphicsDevice);
@@ -77,7 +78,7 @@ public class MeadowApp : App<F7FeatherV2>
 
         // Views
         Resolver.Services.Create<MainView>();
-        Resolver.Services.Create<CalibrationView>();
+        //Resolver.Services.Create<CalibrationView>();
 
         // Input
         /*var inputManager = W.CreateInputManager(WeatherViewManager);
@@ -109,7 +110,7 @@ public class MeadowApp : App<F7FeatherV2>
         await WaitForNetwork();
         GC.Collect();
 
-        TouchScreen.TouchUp += (s, e) =>
+        /*TouchScreen.TouchUp += (s, e) =>
         {
             Resolver.Log.Info($"Touch Up: {e.ScreenX}, {e.ScreenY}");
             ViewManager.OnTouchUp(e);
@@ -132,7 +133,7 @@ public class MeadowApp : App<F7FeatherV2>
             Resolver.Log.Info($"Touch Click: {e.ScreenX}, {e.ScreenY}");
             //WeatherViewManager.OnTouchUp(e);
         };
-
+        */
         Resolver.Log.Info("Starting WeatherViewManager");
         DrawText(Display, "Loading...");
         /*  There's an issue with touch screen sharing the same SPI bus with the display. It's not working.

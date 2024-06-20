@@ -1,5 +1,4 @@
 ﻿using Meadow;
-using System;
 using System.Threading.Tasks;
 
 namespace Weather

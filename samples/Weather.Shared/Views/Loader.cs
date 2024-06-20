@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Chibi.Ui.DataBinding;
+using Chibi.Ui.Geometry;
 using Chibi.Ui.Weather.Shared.OpenMeteo;
 using Meadow;
 using Meadow.Foundation.Graphics;
@@ -117,10 +120,17 @@ public class Loader
                             Font = new Font12x16(),
                             Color = Color.White
                         },
+                        /*new Circle()
+                        {
+                            Width = 18,
+                            Filled = true,
+                            Color = WeatherColorMapper.GetColorForWmoCode(condition),
+                            Margin = new Thickness(2),
+                        },*/
                         new Image()
                         {
-                            Source = _assets.FromResource<Loader>($"Chibi.Ui.Weather.Shared.Icons.sun.bmp"),
-                            TransparencyColor = new Color(0,0,0,0)
+                            Source = _assets.FromResource<Loader>("Chibi.Ui.Weather.Shared.Icons.sunny_color.jpg"),
+                            Width = 18,
                         },
                         new TextBlock
                         {
@@ -151,5 +161,53 @@ public class Loader
         {
             _loading.Next(false);
         }
+    }
+}
+public static class WeatherColorMapper
+{
+    public static readonly Dictionary<int, Color> WmoCodeToColor = new Dictionary<int, Color>
+    {
+        { 0, new Color(255, 223, 0, 255) },       // Sunny: Yellow
+        { 1, new Color(255, 223, 0, 255) },       // Mainly Sunny: Yellow
+        { 2, new Color(135, 206, 250, 255) },     // Partly Cloudy: Light Blue
+        { 3, new Color(192, 192, 192, 255) },     // Cloudy: Gray
+        { 45, new Color(169, 169, 169, 255) },    // Foggy: Dark Gray
+        { 48, new Color(169, 169, 169, 255) },    // Rime Fog: Dark Gray
+        { 51, new Color(173, 216, 230, 255) },    // Light Drizzle: Light Blue
+        { 53, new Color(100, 149, 237, 255) },    // Drizzle: Cornflower Blue
+        { 55, new Color(30, 144, 255, 255) },     // Heavy Drizzle: Dodger Blue
+        { 56, new Color(176, 224, 230, 255) },    // Light Freezing Drizzle: Powder Blue
+        { 57, new Color(70, 130, 180, 255) },     // Freezing Drizzle: Steel Blue
+        { 61, new Color(173, 216, 230, 255) },    // Light Rain: Light Blue
+        { 63, new Color(100, 149, 237, 255) },    // Rain: Cornflower Blue
+        { 65, new Color(30, 144, 255, 255) },     // Heavy Rain: Dodger Blue
+        { 66, new Color(176, 224, 230, 255) },    // Light Freezing Rain: Powder Blue
+        { 67, new Color(70, 130, 180, 255) },     // Freezing Rain: Steel Blue
+        { 71, new Color(255, 250, 250, 255) },    // Light Snow: Snow
+        { 73, new Color(240, 248, 255, 255) },    // Snow: Alice Blue
+        { 75, new Color(220, 220, 220, 255) },    // Heavy Snow: Gainsboro
+        { 77, new Color(245, 245, 245, 255) },    // Snow Grains: White Smoke
+        { 80, new Color(173, 216, 230, 255) },    // Light Showers: Light Blue
+        { 81, new Color(100, 149, 237, 255) },    // Showers: Cornflower Blue
+        { 82, new Color(30, 144, 255, 255) },     // Heavy Showers: Dodger Blue
+        { 85, new Color(255, 250, 250, 255) },    // Light Snow Showers: Snow
+        { 86, new Color(240, 248, 255, 255) },    // Snow Showers: Alice Blue
+        { 95, new Color(255, 0, 0, 255) },        // Thunderstorm: Red
+        { 96, new Color(255, 69, 0, 255) },       // Light Thunderstorms With Hail: Orange Red
+        { 99, new Color(139, 0, 0, 255) }         // Thunderstorm With Hail: Dark Red
+    };
+
+    public static Color GetColorForWmoCode(int wmoCode)
+    {
+        if (WmoCodeToColor.TryGetValue(wmoCode, out var code))
+        {
+            Resolver.Log.Info($"WMO code : {wmoCode} mapped to matching code {code}");
+            return code;
+        }
+
+        // Find the closest WMO code
+        int closestKey = WmoCodeToColor.Keys.OrderBy(key => Math.Abs(key - wmoCode)).First();
+        Resolver.Log.Info($"WMO code : {wmoCode} mapped to closest matching code {closestKey}");
+        return WmoCodeToColor[closestKey];
     }
 }
