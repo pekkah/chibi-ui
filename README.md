@@ -1,7 +1,7 @@
 # chibi.ui
 
-Small WPF/Avalonia style UI framework targeting Meadow platform. Tested to work on Desktop and F7v2. 
-Quite a lot of "code" was borrowed from Avalonia and stripped of anything extra.
+Small WPF/Avalonia style UI framework targeting [Meadow platform](https://www.wildernesslabs.co/). Tested to work on Desktop and F7v2. 
+Some Avalonia code was used for ideas and some was borrowed.  
 
 [NuGet](https://www.nuget.org/packages/Chibi.Ui)
 
