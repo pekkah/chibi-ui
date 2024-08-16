@@ -12,9 +12,9 @@
 
     <ItemGroup>
         <PackageReference Include="Meadow.Desktop" Version="1.12.2.1-beta" />
-        <PackageReference Include="Meadow.Foundation" Version="1.12.8" />
+        <PackageReference Include="Meadow.Foundation" Version="1.13.0" />
         <PackageReference Include="Meadow.Foundation.Graphics.MicroLayout" Version="1.12.2.1-beta" />
-        <PackageReference Include="Meadow.Foundation.Sensors.Hid.Keyboard" Version="1.12.2.1-beta" />
+        <PackageReference Include="Meadow.Foundation.Sensors.Hid.Keyboard" Version="1.13.0" />
     </ItemGroup>
 
     <ItemGroup>
