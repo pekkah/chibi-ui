@@ -9,8 +9,8 @@
 		<PackageReference Include="SkiaSharp" Version="2.88.8" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Meadow.Foundation.Graphics.MicroGraphics" Version="1.12.2.1-beta" />
-		<PackageReference Include="Meadow.Desktop" Version="1.12.2.1-beta" />
+		<PackageReference Include="Meadow.Foundation.Graphics.MicroGraphics" Version="1.13.0" />
+		<PackageReference Include="Meadow.Desktop" Version="1.13.0" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.139" />
